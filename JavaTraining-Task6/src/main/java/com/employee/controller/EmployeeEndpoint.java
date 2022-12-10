@@ -1,28 +1,31 @@
 package com.employee.controller;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
 import org.springframework.ws.server.endpoint.annotation.RequestPayload;
 import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
 
 import com.employee.bean.Employee;
+import com.employee.interfaces.AddEmployeeRequest;
+import com.employee.interfaces.AddEmployeeResponse;
+import com.employee.interfaces.DeleteEmployeeRequest;
+import com.employee.interfaces.DeleteEmployeeResponse;
+import com.employee.interfaces.EmployeeInfo;
+import com.employee.interfaces.GetEmployeeByIdRequest;
+import com.employee.interfaces.GetEmployeeIdResponse;
+import com.employee.interfaces.GetEmployeeResponse;
+import com.employee.interfaces.ServiceStatus;
+import com.employee.interfaces.UpdateEmployeeRequest;
+import com.employee.interfaces.UpdateEmployeeResponse;
 import com.employee.service.EmployeeService;
 
 @Endpoint
-public class EmployeeEndpoint  {
+public class EmployeeEndpoint {
 	private static final String NAMESPACE_URI = "http://interfaces.employee.com";
 
 	@Autowired
@@ -30,16 +33,16 @@ public class EmployeeEndpoint  {
 
 	@PayloadRoot(namespace = NAMESPACE_URI, localPart = "getEmployeeRequest")
 	@ResponsePayload
-	public GetEmployeeResponse getEmployee(@RequestPayload GetEmployeeRequest request) {
+	public GetEmployeeResponse getEmployee() {
 		GetEmployeeResponse response = new GetEmployeeResponse();
-		ServiceStatus serviceStatus = new ServiceStatus();
-
-		Employee employee = new Employee();
-		BeanUtils.copyProperties(request.getEmployeeInfo(), employee);
-		employeeService.getEmployee();
-		serviceStatus.setStatus("SUCCESS");
- 	    serviceStatus.setMessage("Content Added Successfully");
-		response.setServiceStatus(serviceStatus);
+		List<EmployeeInfo> employeeInfoList = new ArrayList<>();
+		List<Employee> employee = employeeService.getEmployee();
+		for (int i = 0; i < employeeInfoList.size(); i++) {
+			EmployeeInfo employeeInfo = new EmployeeInfo();
+			BeanUtils.copyProperties(employee.get(i), employeeInfo);
+			employeeInfoList.add(employeeInfo);
+		}
+		response.getEmployeeInfo().addAll(employeeInfoList);
 		return response;
 	}
 
@@ -53,17 +56,17 @@ public class EmployeeEndpoint  {
 		BeanUtils.copyProperties(request.getEmployeeInfo(), employee);
 		employeeService.addEmployee(employee);
 		serviceStatus.setStatus("SUCCESS");
- 	    serviceStatus.setMessage("Content Added Successfully");
+		serviceStatus.setMessage("Content Added Successfully");
 		response.setServiceStatus(serviceStatus);
 		return response;
 	}
-	
+
 	@PayloadRoot(namespace = NAMESPACE_URI, localPart = "getEmployeeByIdRequest")
 	@ResponsePayload
-	public GetEmployeeResponse getEmployee(@RequestPayload GetEmployeeByIdRequest request) {
-		GetEmployeeResponse response = new GetEmployeeResponse();
+	public GetEmployeeIdResponse getEmployee(@RequestPayload GetEmployeeByIdRequest request) {
+		GetEmployeeIdResponse response = new GetEmployeeIdResponse();
 		EmployeeInfo employeeInfo = new EmployeeInfo();
-		BeanUtils.copyProperties(employeeService.getEmployeeById(request.getEmployeeId()), employeeInfo);
+		BeanUtils.copyProperties(employeeService.getEmployeeById(request.getId()), employeeInfo);
 		response.setEmployeeInfo(employeeInfo);
 		return response;
 	}
@@ -85,7 +88,7 @@ public class EmployeeEndpoint  {
 	@PayloadRoot(namespace = NAMESPACE_URI, localPart = "deleteEmployeeRequest")
 	@ResponsePayload
 	public DeleteEmployeeResponse deleteEmployee(@RequestPayload DeleteEmployeeRequest request) {
-		employeeService.deleteEmployee(request.getEmployeeId());
+		employeeService.deleteEmployee(request.getId());
 		ServiceStatus serviceStatus = new ServiceStatus();
 
 		serviceStatus.setStatus("SUCCESS");

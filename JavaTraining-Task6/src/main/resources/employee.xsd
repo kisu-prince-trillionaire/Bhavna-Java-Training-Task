@@ -21,20 +21,16 @@
 			<xs:element name="message" type="xs:string" />
 		</xs:sequence>
 	</xs:complexType>
-	
+
 	<xs:element name="getEmployeeRequest">
-		<xs:complexType>
-			<xs:sequence>
-				<xs:element name="employeeInfo" type="tns:employeeInfo" />
-			</xs:sequence>
-		</xs:complexType>
+		<xs:complexType />
 	</xs:element>
 
 	<xs:element name="getEmployeeResponse">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element name="serviceStatus" type="tns:serviceStatus" />
-				<xs:element name="employeeInfo" type="tns:employeeInfo" />
+				<xs:element name="employeeInfo" type="tns:employeeInfo"
+					maxOccurs="unbounded" />
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
